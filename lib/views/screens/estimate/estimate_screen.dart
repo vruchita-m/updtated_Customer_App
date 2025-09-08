@@ -22,6 +22,7 @@ import '../../../config/components/loading_widget.dart';
 import '../../../config/data/model/ticket/ticket_model.dart';
 import '../../../config/routes/routes_name.dart';
 import '../full_image_view_screen.dart';
+import '../timeline/horizontal_timeline.dart';
 
 class EstimateScreen extends StatefulWidget {
   final TicketsResults ticketsResults;
@@ -159,9 +160,54 @@ class _EstimateScreenState extends State<EstimateScreen> {
                           borderRadius: BorderRadius.circular(25)),
                       child: Column(
                         children: [
+
+                          // Horizonatl Timeline
+                          // Padding(
+                          //   padding: const EdgeInsets.only(left: 20, right: 20, bottom: 10, top:30),
+                          //   child: Align(
+                          //     alignment: Alignment.centerLeft,
+                          //     child: GestureDetector(
+                          //       onTap: () {
+                          //         // Navigate to the timeline page when the timeline is tapped
+                          //         Navigator.pushNamed(context, RoutesName.timeline,
+                          //           arguments: {
+                          //             "ticketId": widget.ticketsResults.complaintNo,
+                          //           },
+                          //         );
+                          //       },
+                          //       child: SingleChildScrollView(
+                          //         scrollDirection: Axis.horizontal,
+                          //         child: _buildTimeline(widget.ticketsResults.status ?? 'Ticket Generate'),
+                          //       ),
+                          //     ),
+                          //   ),
+                          // ),
+                          // ... inside the Column
+                          // estimate_screen.dart
+                          Padding(
+                            padding: const EdgeInsets.only(left: 20, right: 20, bottom: 10, top: 30),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.pushNamed(
+                                    context,
+                                    RoutesName.timeline,
+                                    arguments: {
+                                      "ticketId": widget.ticketsResults.complaintNo,
+                                    },
+                                  );
+                                },
+                                child: HorizontalTimeline(
+                                  complaintNo: widget.ticketsResults.complaintNo!,
+                                ),
+                              ),
+                            ),
+                          ),
+
                           // 1. Ticket No
                           Padding(
-                            padding: const EdgeInsets.only( left: 20, right: 20, top: 30, bottom: 10),
+                            padding: const EdgeInsets.only( left: 20, right: 20, bottom: 10),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
@@ -191,7 +237,7 @@ class _EstimateScreenState extends State<EstimateScreen> {
                             ),
                           ),
 
-                          // 2. Date / Time
+                          // 2. Date & Time
                           Padding(
                             // padding: const EdgeInsets.symmetric( vertical: 15, horizontal: 20),
                             padding: const EdgeInsets.only(left: 20, right: 20, bottom: 15),
@@ -201,7 +247,7 @@ class _EstimateScreenState extends State<EstimateScreen> {
                                 SizedBox(
                                 width: 170, // fixed width for label column
                                 child: InterText(
-                                    text: 'Date / Time:',
+                                    text: 'Date & Time:',
                                     fontsize: 14,
                                     fontweight: FontWeight.w400,
                                     color:
@@ -1349,3 +1395,121 @@ Widget _buildShimmerTotal() {
     },
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Horizontal Timeline
+// Widget _buildTimeline(String ticketStatus) {
+//   final List<String> allStages = [
+//     "Ticket \n Generate",
+//     "Mechanic \n Assigned",
+//     "Attend \n Process",
+//     "Vehicle Investigation",
+//     "Estimate \n Received",
+//     "Estimate \n Accepted",
+//     "Re-estimate",
+//     "Delay Reason",
+//     "Work \n Done",
+//     "Received \n Invoice",
+//     "Payment \n Done"
+//   ];
+//   final int currentStageIndex = allStages.indexOf(ticketStatus);
+//
+//   return SingleChildScrollView(
+//     scrollDirection: Axis.horizontal,
+//     child: Row(
+//       children: List.generate(allStages.length, (index) {
+//         final String stageName = allStages[index];
+//         final bool isCompleted = index < currentStageIndex;
+//         final bool isCurrent = index == currentStageIndex;
+//
+//         Color dotColor;
+//         Widget dotChild = const SizedBox.shrink();
+//
+//         if (isCompleted) {
+//           dotColor = AppColors.colGreen;
+//           dotChild = const Icon(Icons.check, size: 10, color: Colors.white);
+//         } else if (isCurrent) {
+//           dotColor = AppColors.colGreen; // You can change this to a different color for the "running" dot
+//         } else {
+//           dotColor = AppColors.primarycol;
+//         }
+//
+//         return Column(
+//           crossAxisAlignment: CrossAxisAlignment.center,
+//           children: [
+//             // Line and Dot combined
+//             Row(
+//               children: [
+//                 // Left connector line
+//                 if (index > 0)
+//                   Container(
+//                     height: 2,
+//                     width: 50, // Adjust width as needed
+//                     color: isCompleted ? AppColors.colGreen : AppColors.primarycol,
+//                   ),
+//                 // Dot
+//                 Container(
+//                   width: 15,
+//                   height: 15,
+//                   decoration: BoxDecoration(
+//                     color: dotColor,
+//                     shape: BoxShape.circle,
+//                   ),
+//                   child: Center(child: dotChild),
+//                 ),
+//                 // Right connector line (for all but the last stage)
+//                 if (index < allStages.length - 1)
+//                   Container(
+//                     height: 2,
+//                     width: 50, // Adjust width as needed
+//                     color: isCompleted ? AppColors.colGreen : AppColors.primarycol,
+//
+//                   ),
+//               ],
+//             ),
+//             const SizedBox(height: 8),
+//             Container(
+//               constraints: const BoxConstraints(maxWidth: 55), // Set a max width to prevent text overflow
+//               child: InterText(
+//                 text: stageName,
+//                 fontsize: 10,
+//                 fontweight: FontWeight.w600,
+//                 color: isCompleted || isCurrent ? AppColors.colGreen : AppColors.primarycol,
+//                 textalign: TextAlign.center,
+//               ),
+//             ),
+//           ],
+//         );
+//       }),
+//     ),
+//   );
+// }
+
+
+
+
+
+// Part of estimate_screen.dart
+
+// Horizontal Timeline
+// Part of estimate_screen.dart
+
+// Horizontal Timeline
+
+
+
+
+
+

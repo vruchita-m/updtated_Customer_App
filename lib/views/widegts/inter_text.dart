@@ -9,6 +9,7 @@ class InterText extends StatelessWidget {
   final TextOverflow? textOverflow;
   final double? height;
   final int? maxLines;
+
   const InterText(
       {super.key,
       this.text,
@@ -18,7 +19,8 @@ class InterText extends StatelessWidget {
       this.textOverflow,
       this.fontweight,
       this.maxLines,
-      this.textalign});
+      this.textalign,
+      });
 
   @override
   Widget build(BuildContext context) {
