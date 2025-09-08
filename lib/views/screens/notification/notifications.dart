@@ -195,8 +195,7 @@ class _NotificationsState extends State<Notifications> {
 
     try {
       DateTime dateTime = DateTime.parse(dateString);
-      String formattedDate = DateFormat("dd MMM yyyy")
-          .format(dateTime.toUtc().add(const Duration(hours: 5, minutes: 30)));
+      String formattedDate = DateFormat("dd MMM yyyy").format(dateTime.toUtc().add(const Duration(hours: 5, minutes: 30)));
       return formattedDate;
     } catch (e) {
       return 'N/A';

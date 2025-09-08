@@ -17,7 +17,7 @@ class CustomTicketsCard extends StatelessWidget implements PreferredSizeWidget {
   final Color colorborder;
   final List<Widget>? children;
 
-  // ✅ NAYE PARAMETERS ADD KIYE GAYE
+  // New Parameters
   final String customerName;
   final String vehicleModel;
   final String vehicleMake;
@@ -36,7 +36,7 @@ class CustomTicketsCard extends StatelessWidget implements PreferredSizeWidget {
     required this.color,
     required this.colorborder,
     this.children,
-    // ✅ NAYE PARAMETERS CONSTRUCTOR ME ADD KIYE GAYE
+    // New Parameters
     required this.customerName,
     required this.vehicleModel,
     required this.vehicleMake,
@@ -48,7 +48,7 @@ class CustomTicketsCard extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 7),
+      margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 7),
       width: width,
       decoration: BoxDecoration(
           border: Border.all(color: colorborder),

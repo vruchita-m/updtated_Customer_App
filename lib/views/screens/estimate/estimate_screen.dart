@@ -40,9 +40,10 @@ class _EstimateScreenState extends State<EstimateScreen> {
     if (dateString == null || dateString.isEmpty) return 'N/A';
 
     try {
-      DateTime dateTime = DateTime.parse(dateString);
-      String formattedDate = DateFormat("dd MMM yyyy").format(dateTime);
-      return formattedDate;
+      DateTime dateTime = DateTime.parse(dateString).toLocal(); // Remark - Add '.toLocal()'.
+      // String formattedDate = DateFormat("dd MMM yyyy").format(dateTime);
+      // return formattedDate;
+      return DateFormat("dd MMM yyyy, hh:mm a").format(dateTime);
     } catch (e) {
       return 'N/A';
     }
@@ -146,7 +147,7 @@ class _EstimateScreenState extends State<EstimateScreen> {
                     .replaceAll(RegExp(r'^, |,$'), '');
             return SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.only( left: 20, right: 20, bottom: 50),
+                padding: const EdgeInsets.only( left: 15, right: 15, bottom: 50),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -211,12 +212,14 @@ class _EstimateScreenState extends State<EstimateScreen> {
                                 //   text: formatDate(widget
                                 //       .ticketsResults.createdAt
                                 //       ?.toString()),
-                                InterText(
-                                  text: formatDate(widget.ticketsResults.createdAt),
-                                  fontsize: 14,
-                                  fontweight: FontWeight.w600,
-                                  color: AppColors.lightblackcol,
-                                )
+                                Expanded(
+                                  child: InterText(
+                                      text: formatDate(widget.ticketsResults.createdAt),
+                                      fontsize: 14,
+                                      fontweight: FontWeight.w600,
+                                      color: AppColors.lightblackcol,
+                                    )
+                                ),
                               ],
                             ),
                           ),

@@ -351,8 +351,7 @@ class _CloseTicketsState extends State<CloseTickets> {
                         },
                         child: CustomTicketsCard(
                           text: ticket.status ?? "N/A",
-                          text2:
-                          changeTimeFormat(ticket.createdAt ?? "") ?? "N/A",
+                          text2:changeTimeFormat(ticket.createdAt ?? "") ?? "N/A",
                           complaintNo: ticket.complaintNo ?? "N/A",
                           vehicleNo: ticket.vehicle?.vehicleNumber ?? "N/A",
                           assignedTo: ticket.mechanic?.name ?? "N/A",
