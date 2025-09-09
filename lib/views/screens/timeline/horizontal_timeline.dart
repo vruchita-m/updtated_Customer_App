@@ -13,10 +13,13 @@ class HorizontalTimeline extends StatefulWidget {
   _HorizontalTimelineState createState() => _HorizontalTimelineState();
 }
 
-class _HorizontalTimelineState extends State<HorizontalTimeline> {
+class _HorizontalTimelineState extends State<HorizontalTimeline> with SingleTickerProviderStateMixin {
   bool _isLoading = true;
   String? _errorMessage;
   Map<String, String> _completedStageIds = {};
+
+  late AnimationController _glowController;
+  late Animation<double> _glowAnimation;
 
   final List<TimelineEvent> allEvents = [
     TimelineEvent(id: 'TKTGEN', title: 'Ticket\nGenerate'),
@@ -25,7 +28,7 @@ class _HorizontalTimelineState extends State<HorizontalTimeline> {
     TimelineEvent(id: 'INVEST', title: 'Vehicle\nInvestigation'),
     TimelineEvent(id: 'ESTIMT', title: 'Estimate\nReceived'),
     TimelineEvent(id: 'ESTACC', title: 'Estimate\nAccepted'),
-    TimelineEvent(id: 'REESTM', title: 'Re-estimate'),
+    TimelineEvent(id: 'REESTM', title: 'Re-\nestimate'),
     TimelineEvent(id: 'DELRSN', title: 'Delay\nReason'),
     TimelineEvent(id: 'WRKDON', title: 'Work\nDone'),
     TimelineEvent(id: 'FINBIL', title: 'Received\nInvoice'),
@@ -36,6 +39,22 @@ class _HorizontalTimelineState extends State<HorizontalTimeline> {
   void initState() {
     super.initState();
     _fetchTimelineData();
+
+    // Initialize glow animation
+    _glowController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    )..repeat(reverse: true);
+
+    _glowAnimation = Tween<double>(begin: 0, end: 8).animate(
+      CurvedAnimation(parent: _glowController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _glowController.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchTimelineData() async {
@@ -75,35 +94,24 @@ class _HorizontalTimelineState extends State<HorizontalTimeline> {
     }
   }
 
-  String _formatDateTime(String? dateTime) {
-    if (dateTime == null || dateTime.isEmpty) return '';
-    try {
-      DateTime parsed = DateTime.parse(dateTime);
-      return DateFormat('dd MMM yyyy, hh:mm a').format(parsed);
-    } catch (e) {
-      return dateTime;
-    }
+  double getDotSize(bool isCompleted, bool isCurrent) {
+    // Blue/pending dots smaller
+    if (!isCompleted && !isCurrent) return 16; // <-- This is the line that sets the size of the blue dot
+    return 16; // Completed or current dots
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (_errorMessage != null) {
-      return Center(
-        child: Text(_errorMessage!),
-      );
-    }
+    if (_isLoading) return const Center(child: CircularProgressIndicator());
+    if (_errorMessage != null) return Center(child: Text(_errorMessage!));
 
     final lastCompletedId = _completedStageIds.isNotEmpty ? _completedStageIds.keys.last : '';
     final lastCompletedIndex = allEvents.indexWhere((event) => event.id == lastCompletedId);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5 ),
+      padding: const EdgeInsets.only(top: 1, bottom: 28), // extra top for glow
       child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal, // scroll
+        scrollDirection: Axis.horizontal,
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: List.generate(allEvents.length, (index) {
@@ -113,90 +121,87 @@ class _HorizontalTimelineState extends State<HorizontalTimeline> {
 
             Color dotColor;
             Widget dotChild = const SizedBox.shrink();
-            List<BoxShadow>? boxShadow;
-            BoxBorder? border;
 
             if (isCompleted) {
               dotColor = AppColors.colGreen;
-              dotChild = const Icon(Icons.check, size: 10, color: Colors.white);
+              dotChild = const Icon(Icons.check, size: 12, color: Colors.white);
             } else if (isCurrent) {
               dotColor = AppColors.colGreen;
-              boxShadow = [
-                BoxShadow(
-                  color: AppColors.colGreen.withOpacity(0.9),
-                  blurRadius: 5.0,
-                  spreadRadius: 2.0,
-                ),
-              ];
-              border = Border.all(color: AppColors.whitecol, width: 2.0);
             } else {
               dotColor = AppColors.primarycol;
             }
 
-            final eventTime = _completedStageIds[event.id];
             final textColor = isCompleted || isCurrent ? AppColors.colGreen : AppColors.primarycol;
             final lineColor = isCompleted || isCurrent ? AppColors.colGreen : AppColors.primarycol;
 
-            return IntrinsicHeight(
-              child: Row(
+            double dotSize = getDotSize(isCompleted, isCurrent);
+
+            return SizedBox(
+              width: 80,
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                  const SizedBox(height: 8),
+                  Row(
                     children: [
-                      // Dot
-                      Container(
-                        width: 19, // Outer circle size (dot + border)
-                        height: 19,
-                        decoration: BoxDecoration(
-                          color: isCurrent ? Colors.white : dotColor, // Outer color is white for running stage
-                          shape: BoxShape.circle,
-                          boxShadow: boxShadow,
-                          border: border,
-                        ),
-                        child: Center(
-                          child: Container(
-                            width: 15, // Inner circle size
-                            height: 15,
+                      // Dot with glow animation for current stage
+                      Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          isCurrent
+                              ? AnimatedBuilder(
+                            animation: _glowController,
+                            builder: (context, child) {
+                              return Container(
+                                width: dotSize,
+                                height: dotSize,
+                                decoration: BoxDecoration(
+                                  color: dotColor,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: AppColors.whitecol, width: 2),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppColors.colGreen.withOpacity(0.5),
+                                      blurRadius: _glowAnimation.value,
+                                      spreadRadius: _glowAnimation.value / 2,
+                                    ),
+                                  ],
+                                ),
+                                child: Center(child: dotChild),
+                              );
+                            },
+                          )
+                              : Container(
+                            width: dotSize,
+                            height: dotSize,
                             decoration: BoxDecoration(
                               color: dotColor,
                               shape: BoxShape.circle,
                             ),
                             child: Center(child: dotChild),
                           ),
+                        ],
+                      ),
+                      // Line after dot
+                      Expanded(
+                        child: Container(
+                          height: 2,
+                          color: (index == allEvents.length - 1) ? Colors.transparent : lineColor,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Container(
-                        constraints: const BoxConstraints(maxWidth: 55),
-                        child: InterText(
-                          text: event.title,
-                          textalign: TextAlign.center,
-                          fontsize: 10,
-                          fontweight: FontWeight.w600,
-                          color: textColor,
-                        ),
-                      ),
-                      if (eventTime != null)
-                        Container(
-                          constraints: const BoxConstraints(maxWidth: 55),
-                          // child: Text(
-                          //   _formatDateTime(eventTime),
-                          //   textAlign: TextAlign.center,
-                          //   style: const TextStyle(fontSize: 8,
-                          //     color: Colors.black45,
-                          //   ),
-                          // ),
-                        ),
                     ],
                   ),
-                  if (index < allEvents.length - 1)
-                    Container(
-                      height: 1, // Corrected to 2 to match the design
-                      width: 50,
-                      margin: const EdgeInsets.only(top: 8.5, left: 1.0, right:1.0),
-                      color: lineColor,
-                    ),
+                  const SizedBox(height: 6),
+                  // Stage name left-aligned under dot
+                  InterText(
+                    text: event.title,
+                    textalign: TextAlign.start,
+                    fontsize: 11,
+                    fontweight: FontWeight.w600,
+                    color: textColor,
+                    maxLines: 2,
+                    textOverflow: TextOverflow.ellipsis,
+                  ),
                 ],
               ),
             );
@@ -211,11 +216,9 @@ class TimelineEvent {
   final String id;
   final String title;
   final String? time;
-  final List<TimelineEvent>? subStages;
   TimelineEvent({
     required this.id,
     required this.title,
     this.time,
-    this.subStages,
   });
 }
